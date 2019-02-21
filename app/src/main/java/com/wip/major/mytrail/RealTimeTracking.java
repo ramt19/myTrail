@@ -18,16 +18,18 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.location.Location;
 import android.Manifest;
 import android.os.IBinder;
+import android.preference.PreferenceManager;
 import android.support.v4.app.NotificationCompat;
 import android.support.v4.content.ContextCompat;
 import android.util.Log;
 
 public class RealTimeTracking extends Service {
-
+    private String email;
     private static final String TAG = RealTimeTracking.class.getSimpleName();
 
     @Override
@@ -66,8 +68,11 @@ public class RealTimeTracking extends Service {
     };
 
     private void loginToFirebase() {
-        String email = getString(R.string.firebase_email);
-        String password = getString(R.string.firebase_password);
+        Context ctx = getApplicationContext();
+        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(ctx);
+
+        email = prefs.getString("email",null);
+        String password = prefs.getString("pass",null);
         FirebaseAuth.getInstance().signInWithEmailAndPassword(
                 email, password).addOnCompleteListener(new OnCompleteListener<AuthResult>(){
             @Override
@@ -88,7 +93,7 @@ public class RealTimeTracking extends Service {
         request.setFastestInterval(5000);
         request.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
         FusedLocationProviderClient client = LocationServices.getFusedLocationProviderClient(this);
-        final String path = getString(R.string.firebase_path) + "/" + getString(R.string.transport_id);
+        //final String path = getString(R.string.firebase_path) + "/" + getString(R.string.transport_id);
         int permission = ContextCompat.checkSelfPermission(this,
                 Manifest.permission.ACCESS_FINE_LOCATION);
         if (permission == PackageManager.PERMISSION_GRANTED) {
@@ -97,11 +102,14 @@ public class RealTimeTracking extends Service {
             client.requestLocationUpdates(request, new LocationCallback() {
                 @Override
                 public void onLocationResult(LocationResult locationResult) {
-                    DatabaseReference ref = FirebaseDatabase.getInstance().getReference(path);
+                    DatabaseReference ref = FirebaseDatabase.getInstance().getReference();
                     Location location = locationResult.getLastLocation();
                     if (location != null) {
                         Log.d(TAG, "location update " + location);
-                        ref.setValue(location);
+                        Context ctx = getApplicationContext();
+                        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(ctx);
+                        String uid = prefs.getString("uid", null);
+                        ref.child("Location").child(uid).setValue(location);
                     }
                 }
             }, null);

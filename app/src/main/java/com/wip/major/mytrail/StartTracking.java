@@ -4,8 +4,11 @@ import android.Manifest;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.location.LocationManager;
+import android.preference.PreferenceManager;
+import android.provider.ContactsContract;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.widget.Toast;
@@ -14,11 +17,17 @@ import static android.content.Context.LOCATION_SERVICE;
 public class StartTracking {
 
     private Context mContext;
+    private String mEmail;
+    private String mPass;
+    private String mUID;
     private Intent mIntent;
     private static final int PERMISSIONS_REQUEST = 1;
 
-    public StartTracking (Context context){
+    public StartTracking (Context context, String email, String pass, String uid){
         mContext = context;
+        mEmail = email;
+        mPass = pass;
+        mUID = uid;
         checkPermissions();
     }
 
@@ -42,6 +51,12 @@ public class StartTracking {
     }
 
     private void startTrackerService() {
+        SharedPreferences myPreferences = PreferenceManager.getDefaultSharedPreferences(mContext);
+        SharedPreferences.Editor myEditor = myPreferences.edit();
+        myEditor.putString("email", mEmail);
+        myEditor.putString("pass", mPass);
+        myEditor.putString("uid", mUID);
+        myEditor.commit();
         mContext.startService(new Intent(mContext, RealTimeTracking.class));
     }
 

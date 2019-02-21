@@ -17,9 +17,9 @@ public class LocationSMS {
 
     protected void checkPermission(){
 
-        if(ContextCompat.checkSelfPermission(this, Manifest.permission.SEND_SMS) != PackageManager.PERMISSION_GRANTED){
-
-        }
+//        if(ContextCompat.checkSelfPermission(this, Manifest.permission.SEND_SMS) != PackageManager.PERMISSION_GRANTED){
+//
+//        }
     }
 
     protected void sendSMS(){
