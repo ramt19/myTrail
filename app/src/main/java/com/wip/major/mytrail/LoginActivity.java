@@ -21,6 +21,7 @@ import android.os.Build;
 import android.os.Bundle;
 import android.provider.ContactsContract;
 import android.text.TextUtils;
+import android.util.Log;
 import android.view.KeyEvent;
 import android.view.View;
 import android.view.View.OnClickListener;
@@ -30,6 +31,12 @@ import android.widget.AutoCompleteTextView;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
+import android.widget.Toast;
+
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.Task;
+import com.google.firebase.auth.AuthResult;
+import com.google.firebase.auth.FirebaseAuth;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -199,9 +206,24 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
         } else {
             // Show a progress spinner, and kick off a background task to
             // perform the user login attempt.
-            showProgress(true);
-            mAuthTask = new UserLoginTask(email, password);
-            mAuthTask.execute((Void) null);
+           // showProgress(true);
+          //  mAuthTask = new UserLoginTask(email, password);
+           // mAuthTask.execute((Void) null);
+            FirebaseAuth.getInstance().signInWithEmailAndPassword(
+                    email, password).addOnCompleteListener(new OnCompleteListener<AuthResult>(){
+                @Override
+                public void onComplete(Task<AuthResult> task) {
+                    if (task.isSuccessful()) {
+                        Intent mIntent = new Intent(LoginActivity.this, Tracking_Window.class);
+
+                       LoginActivity.this.startActivity(mIntent);
+
+                    } else {
+                        Toast.makeText(LoginActivity.this, "Email/Password incorrect! Try again.", Toast.LENGTH_SHORT).show();
+                    }
+                }
+            });
+
         }
     }
 
