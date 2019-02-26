@@ -6,24 +6,25 @@ import android.support.v4.content.ContextCompat;
 import android.telephony.SmsManager;
 
 public class LocationSMS {
-    String phone;
-    String msg;
+    private String phone;
+    private String lat;
+    private String lon;
 
-    public LocationSMS(String phone, String msg){
+    public LocationSMS(String phone, String lat, String lon){
         this.phone = phone;
-        this.msg = msg;
+        this.lat = lat;
+        this.lon = lon;
     }
 
-
-    protected void checkPermission(){
-
-//        if(ContextCompat.checkSelfPermission(this, Manifest.permission.SEND_SMS) != PackageManager.PERMISSION_GRANTED){
-//
-//        }
-    }
 
     protected void sendSMS(){
         SmsManager smsManager = SmsManager.getDefault();
-        smsManager.sendTextMessage(phone, null, msg, null, null);
+        smsManager.sendTextMessage(phone, null, genSMS(), null, null);
+    }
+
+    protected String genSMS(){
+        String msg;
+        msg = "https://www.google.com/maps/search/?api=1&query="+lat+","+lon;
+        return msg;
     }
 }

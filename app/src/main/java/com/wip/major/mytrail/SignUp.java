@@ -1,6 +1,7 @@
 package com.wip.major.mytrail;
 
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.provider.ContactsContract;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -52,10 +53,11 @@ public class SignUp extends AppCompatActivity {
         mUser.signUp(mUser);
         FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
         if(user!= null) {
-            Intent mIntent = new Intent(this, Tracking_Window.class);
-            mIntent.putExtra("email", email);
-            mIntent.putExtra("pass", pass);
-            mIntent.putExtra("uid", uid);
+            Intent mIntent = new Intent(this, FrontActivity.class);
+            SharedPreferences pref = getApplicationContext().getSharedPreferences("session", MODE_PRIVATE);
+            SharedPreferences.Editor editor = pref.edit();
+            editor.putString("email", email);
+            editor.putString("pass", pass);
             this.startActivity(mIntent);
         }
         else{
