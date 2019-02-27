@@ -51,22 +51,6 @@ public class UpdateContacts extends AppCompatActivity {
 
         adapter = new MyAdapter(this);
         populateContactValues();
-//        recyclerView.addOnItemTouchListener(new RecyclerTouchListener(this,
-//                recyclerView, new ClickListener() {
-//
-//            @Override
-//            public void onClick(View view, final int position) {
-//                //Values are passing to activity & to fragment as well
-//
-//            }
-//
-//            @Override
-//            public void onLongClick(View view, int position) {
-//                Toast.makeText(UpdateContacts.this, "Long press on position :"+position,
-//                        Toast.LENGTH_LONG).show();
-//            }
-//
-//        }));
         selectContacts = (Button) findViewById(R.id.addContacts);
         selectContacts.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -74,21 +58,28 @@ public class UpdateContacts extends AppCompatActivity {
                 Intent intent = new Intent(Intent.ACTION_PICK, ContactsContract.Contacts.CONTENT_URI);
                 intent.setType(ContactsContract.CommonDataKinds.Phone.CONTENT_TYPE);
                 startActivityForResult(intent, 1);
-
             }
         });
-
     }
 
     private void populateContactValues() {
         Log.i(TAG, "populatecontactvalues start");
         SharedPreferences pref = getApplication().getSharedPreferences("session", Context.MODE_PRIVATE);
+        final SharedPreferences.Editor editor = pref.edit();
         final String uid = pref.getString("uid","null");
         DatabaseReference firebaseDatabase = FirebaseDatabase.getInstance().getReference();
         final DatabaseReference users = firebaseDatabase.child("Users");
         ValueEventListener valueEventListener = new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
+                if(dataSnapshot.child(uid).child("Contacts").exists()){
+                    editor.putString("contacts","true");
+                }
+                else
+                {
+                    editor.putString("contacts","false");
+                }
+                editor.commit();
                 for(DataSnapshot dataSnapshot1: dataSnapshot.child(uid).child("Contacts").getChildren()){
                     String name = dataSnapshot1.getKey();
                     String phone = (String) dataSnapshot1.getValue();
@@ -97,6 +88,7 @@ public class UpdateContacts extends AppCompatActivity {
                     contact.setNumber(phone);
                     myDataset.add(contact);
                     Log.i(TAG, name);
+
                 }
                 adapter.setListContent(myDataset);
                 recyclerView.setAdapter(adapter);
@@ -186,50 +178,4 @@ public class UpdateContacts extends AppCompatActivity {
         }
     }
 
-
-//    public static class MyAdapter extends RecyclerView.Adapter<MyAdapter.MyViewHolder>{
-//        private String[] mDataset;
-//
-//        public static class MyViewHolder extends RecyclerView.ViewHolder {
-//            // each data item is just a string in this case
-//            public TextView textView;
-//            public MyViewHolder(TextView v) {
-//                super(v);
-//                textView = v;
-//            }
-//        }
-//
-//        // Provide a suitable constructor (depends on the kind of dataset)
-//        public MyAdapter(String[] myDataset) {
-//            mDataset = myDataset;
-//        }
-//
-//        // Create new views (invoked by the layout manager)
-//        @Override
-//        public MyAdapter.MyViewHolder onCreateViewHolder(ViewGroup parent,
-//                                                         int viewType) {
-//             //create a new view
-//            TextView v = (TextView) LayoutInflater.from(parent.getContext())
-//                    .inflate(R.layout.my_text_view, parent, false);
-//
-//            MyViewHolder vh = new MyViewHolder(v);
-//            return vh;
-//        }
-//
-//        // Replace the contents of a view (invoked by the layout manager)
-//        @Override
-//        public void onBindViewHolder(MyViewHolder holder, int position) {
-//            // - get element from your dataset at this position
-//            // - replace the contents of the view with that element
-//            holder.textView.setText(mDataset[position]);
-//
-//        }
-//
-//        // Return the size of your dataset (invoked by the layout manager)
-//        @Override
-//        public int getItemCount() {
-//            return mDataset.length;
-//        }
-//
-//    }
 }

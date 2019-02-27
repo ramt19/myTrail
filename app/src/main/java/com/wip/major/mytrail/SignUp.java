@@ -58,6 +58,7 @@ public class SignUp extends AppCompatActivity {
             SharedPreferences.Editor editor = pref.edit();
             editor.putString("email", email);
             editor.putString("pass", pass);
+            editor.putString("contacts","false");
             this.startActivity(mIntent);
         }
         else{

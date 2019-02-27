@@ -72,6 +72,7 @@ public class FrontActivity extends AppCompatActivity
     private String lat;
     private String lon;
     private DetectShake mShaker;
+    private LocationSMS sms;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -108,12 +109,14 @@ public class FrontActivity extends AppCompatActivity
             @SuppressLint("MissingPermission")
             @Override
             public void onClick(View view) {
-                LocationManager lm = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
-                if (!lm.isProviderEnabled(LocationManager.GPS_PROVIDER))
-                    Toast.makeText(getApplicationContext(), "Enable GPS", LENGTH_SHORT).show();
+                if (checkContacts()) {
+                    LocationManager lm = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
+                    if (!lm.isProviderEnabled(LocationManager.GPS_PROVIDER))
+                        Toast.makeText(getApplicationContext(), "Enable GPS", LENGTH_SHORT).show();
 
-                LocationSMS sms = new LocationSMS(getApplicationContext(),lat, lon);
-                sms.sendSMS();
+                    sms = new LocationSMS(getApplicationContext(), lat, lon);
+                    sms.sendSMS();
+                }
             }
         });
 
@@ -127,7 +130,7 @@ public class FrontActivity extends AppCompatActivity
 
         NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
         navigationView.setNavigationItemSelectedListener(this);
-
+        boolean t = checkContacts();
         if (email != null) {
             firebaseDatabase = FirebaseDatabase.getInstance().getReference("Users");
             firebaseDatabase.orderByChild("Email").equalTo(email).addListenerForSingleValueEvent(new ValueEventListener() {
@@ -178,6 +181,7 @@ public class FrontActivity extends AppCompatActivity
                 sms.sendSMS();
             }
         });
+
     }
 
     @Override
@@ -302,5 +306,20 @@ public class FrontActivity extends AppCompatActivity
     @Override
     public void onLocationChanged(Location location) {
 
+    }
+
+    public boolean checkContacts(){
+        pref = getApplicationContext().getSharedPreferences("session",MODE_PRIVATE);
+        String cont = pref.getString("contacts","null");
+
+        if(cont.equals("false")){
+            AlertDialog.Builder builder = new AlertDialog.Builder(FrontActivity.this);
+            builder.setTitle("Alert");
+            builder.setMessage("Create contacts to send Location");
+            AlertDialog dialog = builder.create();
+            dialog.show();
+            return false;
+        }
+        return true;
     }
 }
