@@ -8,6 +8,7 @@
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
     <uses-permission android:name="android.permission.SEND_SMS" />
+    <uses-permission android:name="android.permission.READ_CONTACTS"></uses-permission>
 
     <application
         android:allowBackup="true"
@@ -51,16 +52,11 @@
 
         <activity android:name=".SignUp" />
 
-        <service
-            android:name=".LocationTracking"
-            android:enabled="true"
-            android:exported="true" />
-
         <activity
             android:name=".FrontActivity"
             android:label="@string/title_activity_front"
             android:theme="@style/Theme.AppCompat.Light.NoActionBar" />
-        <activity android:name=".UpdateContacts"></activity>
+        <activity android:name=".UpdateContacts" />
     </application>
 
 </manifest>

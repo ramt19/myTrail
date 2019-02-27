@@ -46,6 +46,7 @@ import java.util.List;
 
 import static android.Manifest.permission.ACCESS_COARSE_LOCATION;
 import static android.Manifest.permission.ACCESS_FINE_LOCATION;
+import static android.Manifest.permission.READ_CONTACTS;
 import static android.Manifest.permission.SEND_SMS;
 
 
@@ -60,6 +61,7 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
     private static final int REQUEST_ACCESS_FINE_PERMISSION = 0;
     private static final int REQUEST_ACCESS_COARSE_PERMISSION = 1;
     private static final int REQUEST_SEND_SMS = 2;
+    private static final int REQUEST_SEND_CONTACTS = 3;
     private SharedPreferences pref;
     private Context context;
     private SharedPreferences.Editor editor;
@@ -177,6 +179,9 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
         if(checkSelfPermission(SEND_SMS) != PackageManager.PERMISSION_GRANTED){
             ActivityCompat.requestPermissions(this,new String[]{SEND_SMS},REQUEST_SEND_SMS);
         }
+        if(checkSelfPermission(READ_CONTACTS) != PackageManager.PERMISSION_GRANTED){
+            ActivityCompat.requestPermissions(this,new String[]{READ_CONTACTS},REQUEST_SEND_CONTACTS);
+        }
         return true;
     }
 
@@ -198,6 +203,11 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
             }
         }
         if (requestCode == REQUEST_SEND_SMS) {
+            if (grantResults.length == 1 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                populateAutoComplete();
+            }
+        }
+        if (requestCode == REQUEST_SEND_CONTACTS) {
             if (grantResults.length == 1 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                 populateAutoComplete();
             }

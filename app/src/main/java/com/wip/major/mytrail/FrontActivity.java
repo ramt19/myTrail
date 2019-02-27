@@ -1,6 +1,7 @@
 package com.wip.major.mytrail;
 
 import android.Manifest;
+import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.app.AlarmManager;
 import android.app.PendingIntent;
@@ -12,8 +13,11 @@ import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
+import android.location.Location;
 import android.location.LocationManager;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
 import android.support.v4.app.ActivityCompat;
@@ -31,11 +35,16 @@ import android.widget.CompoundButton;
 import android.widget.Toast;
 import android.widget.ToggleButton;
 
+import com.google.android.gms.common.ConnectionResult;
+import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationCallback;
+import com.google.android.gms.location.LocationListener;
+import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
+import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
@@ -45,8 +54,10 @@ import com.google.firebase.database.ValueEventListener;
 import java.util.Calendar;
 import java.util.HashMap;
 
+import static android.widget.Toast.LENGTH_SHORT;
+
 public class FrontActivity extends AppCompatActivity
-        implements NavigationView.OnNavigationItemSelectedListener, OnMapReadyCallback, SensorEventListener {
+        implements NavigationView.OnNavigationItemSelectedListener, OnMapReadyCallback, SensorEventListener, GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener, LocationListener {
 
     private GoogleMap mMap;
     private DatabaseReference firebaseDatabase;
@@ -54,6 +65,10 @@ public class FrontActivity extends AppCompatActivity
     private static final String TAG = "Front Activity";
     private Intent intent;
     private SensorManager sensorManager;
+    private GoogleApiClient mGoogleApiClient = null;
+    private Location mLastLocation;
+    private String lat;
+    private String lon;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -74,12 +89,57 @@ public class FrontActivity extends AppCompatActivity
         setSupportActionBar(toolbar);
         getSupportActionBar().setDisplayShowTitleEnabled(false);
 
+        if (mGoogleApiClient == null) {
+            mGoogleApiClient = new GoogleApiClient.Builder(this)
+                    .addConnectionCallbacks(this)
+                    .addOnConnectionFailedListener(this)
+                    .addApi(LocationServices.API)
+                    .build();
+        }
+        if (mGoogleApiClient != null) {
+            mGoogleApiClient.connect();
+        }
 
         FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.sms);
         fab.setOnClickListener(new View.OnClickListener() {
+            @SuppressLint("MissingPermission")
             @Override
             public void onClick(View view) {
-                LocationSMS sms = new LocationSMS("+918003102946", "28.6139","77.2090" );
+                LocationManager lm = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
+                if (!lm.isProviderEnabled(LocationManager.GPS_PROVIDER))
+                    Toast.makeText(getApplicationContext(), "Enable GPS", LENGTH_SHORT).show();
+
+                if(lm.isProviderEnabled(LocationManager.NETWORK_PROVIDER)){
+                    lm.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 1000, 100, new android.location.LocationListener() {
+                        @Override
+                        public void onLocationChanged(Location location) {
+
+                        }
+
+                        @Override
+                        public void onStatusChanged(String provider, int status, Bundle extras) {
+
+                        }
+
+                        @Override
+                        public void onProviderEnabled(String provider) {
+
+                        }
+
+                        @Override
+                        public void onProviderDisabled(String provider) {
+
+                        }
+                    });
+                    if(lm!= null){
+                        mLastLocation = lm.getLastKnownLocation(LocationManager.NETWORK_PROVIDER);
+                        if(mLastLocation!=null){
+                            lat = String.valueOf(mLastLocation.getLatitude());
+                            lon = String.valueOf(mLastLocation.getLongitude());
+                        }
+                    }
+                }
+                LocationSMS sms = new LocationSMS(getApplicationContext(),lat, lon);
                 sms.sendSMS();
             }
         });
@@ -171,10 +231,14 @@ public class FrontActivity extends AppCompatActivity
         int id = item.getItemId();
 
         if (id == R.id.nav_contacts) {
+            Intent inn = new Intent(this, UpdateContacts.class);
+            startActivity(inn);
             // Handle the camera action
         } else if (id == R.id.nav_logout) {
             SharedPreferences.Editor editor = pref.edit();
             editor.remove("email");
+            editor.commit();
+            FirebaseAuth.getInstance().signOut();
             Intent intn = new Intent(this, LoginActivity.class);
             stopService(intent);
             startActivity(intn);
@@ -197,9 +261,7 @@ public class FrontActivity extends AppCompatActivity
             // for ActivityCompat#requestPermissions for more details.
             return;
         }
-        LocationManager lm = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
-        if(!lm.isProviderEnabled(LocationManager.GPS_PROVIDER))
-            Toast.makeText(this, "Enable GPS", Toast.LENGTH_SHORT).show();
+
         mMap.setMyLocationEnabled(true);
     }
 
@@ -215,6 +277,42 @@ public class FrontActivity extends AppCompatActivity
 
     @Override
     public void onAccuracyChanged(Sensor sensor, int accuracy) {
+
+    }
+
+
+    @Override
+    public void onConnected(@Nullable Bundle bundle) {
+        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+            // TODO: Consider calling
+            //    ActivityCompat#requestPermissions
+            // here to request the missing permissions, and then overriding
+            //   public void onRequestPermissionsResult(int requestCode, String[] permissions,
+            //                                          int[] grantResults)
+            // to handle the case where the user grants the permission. See the documentation
+            // for ActivityCompat#requestPermissions for more details.
+            return;
+        }
+        mLastLocation = LocationServices.FusedLocationApi.getLastLocation(
+                mGoogleApiClient);
+        if (mLastLocation != null) {
+            lat = String.valueOf(mLastLocation.getLatitude());
+            lon = String.valueOf(mLastLocation.getLongitude());
+        }
+    }
+
+    @Override
+    public void onConnectionSuspended(int i) {
+
+    }
+
+    @Override
+    public void onConnectionFailed(@NonNull ConnectionResult connectionResult) {
+
+    }
+
+    @Override
+    public void onLocationChanged(Location location) {
 
     }
 }
