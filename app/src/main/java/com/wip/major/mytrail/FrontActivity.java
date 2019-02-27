@@ -4,6 +4,7 @@ import android.Manifest;
 import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.app.AlarmManager;
+import android.app.AlertDialog;
 import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
@@ -16,6 +17,7 @@ import android.hardware.SensorManager;
 import android.location.Location;
 import android.location.LocationManager;
 import android.os.Bundle;
+import android.os.Vibrator;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.design.widget.FloatingActionButton;
@@ -69,6 +71,7 @@ public class FrontActivity extends AppCompatActivity
     private Location mLastLocation;
     private String lat;
     private String lon;
+    private DetectShake mShaker;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -109,36 +112,6 @@ public class FrontActivity extends AppCompatActivity
                 if (!lm.isProviderEnabled(LocationManager.GPS_PROVIDER))
                     Toast.makeText(getApplicationContext(), "Enable GPS", LENGTH_SHORT).show();
 
-                if(lm.isProviderEnabled(LocationManager.NETWORK_PROVIDER)){
-                    lm.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 1000, 100, new android.location.LocationListener() {
-                        @Override
-                        public void onLocationChanged(Location location) {
-
-                        }
-
-                        @Override
-                        public void onStatusChanged(String provider, int status, Bundle extras) {
-
-                        }
-
-                        @Override
-                        public void onProviderEnabled(String provider) {
-
-                        }
-
-                        @Override
-                        public void onProviderDisabled(String provider) {
-
-                        }
-                    });
-                    if(lm!= null){
-                        mLastLocation = lm.getLastKnownLocation(LocationManager.NETWORK_PROVIDER);
-                        if(mLastLocation!=null){
-                            lat = String.valueOf(mLastLocation.getLatitude());
-                            lon = String.valueOf(mLastLocation.getLongitude());
-                        }
-                    }
-                }
                 LocationSMS sms = new LocationSMS(getApplicationContext(),lat, lon);
                 sms.sendSMS();
             }
@@ -188,6 +161,21 @@ public class FrontActivity extends AppCompatActivity
                     new FusedLocationProviderClient(getApplicationContext()).removeLocationUpdates(new LocationCallback());
                     stopService(intent);
                 }
+            }
+        });
+
+        final Vibrator vibe = (Vibrator)getSystemService(Context.VIBRATOR_SERVICE);
+        mShaker = new DetectShake(this);
+        mShaker.setOnShakeListener(new DetectShake.OnShakeListener () {
+            public void onShake()
+            {
+                vibe.vibrate(100);
+                new AlertDialog.Builder(FrontActivity.this)
+                        .setPositiveButton(android.R.string.ok, null)
+                        .setMessage("Location Send!")
+                        .show();
+                LocationSMS sms = new LocationSMS(getApplicationContext(),lat, lon);
+                sms.sendSMS();
             }
         });
     }
