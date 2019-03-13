@@ -29,6 +29,7 @@ public class LocationSMS {
     private Context context;
     private static final String TAG = LocationSMS.class.getSimpleName();
     private static ArrayList<String> list = null;
+    private SharedPreferences pref;
 
     public LocationSMS(Context context, String lat, String lon){
         this.lat = lat;
@@ -37,11 +38,11 @@ public class LocationSMS {
     }
 
 
-    protected void sendSMS() {
+    protected void sendSMS(final boolean val) {
         if (isNetworkConnected()) {
             list = new ArrayList<String>();
             list.clear();
-            SharedPreferences pref = context.getSharedPreferences("session", Context.MODE_PRIVATE);
+            pref = context.getSharedPreferences("session", Context.MODE_PRIVATE);
             final SharedPreferences.Editor editor = pref.edit();
             uid = pref.getString("uid", "null");
             firebaseDatabase = FirebaseDatabase.getInstance().getReference();
@@ -62,7 +63,10 @@ public class LocationSMS {
                         list.add(phone);
                         Log.i(TAG, phone);
                         SmsManager smsManager = SmsManager.getDefault();
-                        smsManager.sendTextMessage(phone, null, genSMS(), null, null);
+                        if(!val)
+                            smsManager.sendTextMessage(phone, null, genSMS(), null, null);
+                        else
+                            smsManager.sendTextMessage(phone, null, genTrack(), null, null);
                     }
                 }
 
@@ -98,5 +102,11 @@ public class LocationSMS {
         ConnectivityManager cm = (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
 
         return cm.getActiveNetworkInfo() != null;
+    }
+
+    protected  String genTrack(){
+        String msg;
+        msg = "https://mytrail-1ff79.firebaseapp.com/maps.html?uid="+uid;
+        return msg;
     }
 }

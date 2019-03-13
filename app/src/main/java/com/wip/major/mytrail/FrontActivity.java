@@ -73,6 +73,7 @@ public class FrontActivity extends AppCompatActivity
     private String lon;
     private DetectShake mShaker;
     private LocationSMS sms;
+    private boolean track = true;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -115,7 +116,7 @@ public class FrontActivity extends AppCompatActivity
                         Toast.makeText(getApplicationContext(), "Enable GPS", LENGTH_SHORT).show();
 
                     sms = new LocationSMS(getApplicationContext(), lat, lon);
-                    sms.sendSMS();
+                    sms.sendSMS(!track);
                 }
             }
         });
@@ -158,7 +159,16 @@ public class FrontActivity extends AppCompatActivity
             @Override
             public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
                 if (!isChecked) {
-                    startService(intent);
+                    if (checkContacts()) {
+                        startService(intent);
+                        LocationManager lm = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
+                        if (!lm.isProviderEnabled(LocationManager.GPS_PROVIDER))
+                            Toast.makeText(getApplicationContext(), "Enable GPS", LENGTH_SHORT).show();
+
+                        sms = new LocationSMS(getApplicationContext(), lat, lon);
+                        sms.sendSMS(track);
+                    }
+
 
                 } else {
                     new FusedLocationProviderClient(getApplicationContext()).removeLocationUpdates(new LocationCallback());
@@ -178,7 +188,7 @@ public class FrontActivity extends AppCompatActivity
                         .setMessage("Location Send!")
                         .show();
                 LocationSMS sms = new LocationSMS(getApplicationContext(),lat, lon);
-                sms.sendSMS();
+                sms.sendSMS(!track);
             }
         });
 
