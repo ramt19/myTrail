@@ -4,6 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:background="@color/background_app"
     tools:context=".UpdateContacts">
 
     <LinearLayout
@@ -17,13 +18,20 @@
 
         <Button
             android:id="@+id/addContacts"
-            android:layout_width="match_parent"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:layout_marginBottom="10dp"
+            android:layout_marginTop="10dp"
+            android:background="@color/button_color"
+            android:gravity="center"
+            android:padding="10dp"
             android:text="Add Contacts" />
 
         <android.support.v7.widget.RecyclerView
             android:id="@+id/contacts"
             android:layout_width="match_parent"
-            android:layout_height="match_parent" />
+            android:layout_height="match_parent"
+            android:background="@color/background_app" />
     </LinearLayout>
 </android.support.constraint.ConstraintLayout>
