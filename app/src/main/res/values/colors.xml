@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <color name="button_color">#d7c736</color>
-    <color name="background_app">#FF57C5F8</color>
+    <color name="button_color">#a5b3ba</color>
+    <color name="background_app">#48B6F8</color>
+    <!--<color name="background_app">#002060</color>-->
 </resources>

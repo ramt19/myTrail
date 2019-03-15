@@ -93,8 +93,8 @@ public class RealTimeTracking extends Service implements LocationListener{
             NotificationCompat.Builder notificationBuilder = new NotificationCompat.Builder(this, NOTIFICATION_CHANNEL_ID);
             Notification notification = notificationBuilder.setOngoing(true)
                     .setSmallIcon(R.drawable.ic_tracker)
-                    .setContentTitle("Tracking Location")
-                    .setContentText("Tap to stop tracking")
+                    .setContentTitle("myTrail ")
+                    .setContentText("Tracking Location...")
                     .setContentIntent(broadcastIntent)
                     .setPriority(NotificationManager.IMPORTANCE_MIN)
                     .setCategory(Notification.CATEGORY_SERVICE)

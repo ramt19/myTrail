@@ -28,7 +28,9 @@
             android:layout_height="wrap_content"
             android:ems="10"
             android:hint="Name"
-            android:inputType="textPersonName" />
+            android:inputType="textPersonName"
+            android:typeface="serif"
+            android:textStyle="bold"/>
     </LinearLayout>
 
     <LinearLayout
@@ -52,7 +54,9 @@
             android:layout_height="wrap_content"
             android:ems="10"
             android:hint="Email"
-            android:inputType="textEmailAddress" />
+            android:inputType="textEmailAddress"
+            android:typeface="serif"
+            android:textStyle="bold"/>
     </LinearLayout>
 
     <LinearLayout
@@ -76,7 +80,9 @@
             android:layout_height="wrap_content"
             android:ems="10"
             android:hint="Password"
-            android:inputType="textPassword" />
+            android:inputType="textPassword"
+            android:typeface="serif"
+            android:textStyle="bold"/>
     </LinearLayout>
 
     <Button
@@ -84,11 +90,17 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="32dp"
-        android:background="@color/button_color"
+
         android:text="Register"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/linearLayout3" />
+        app:layout_constraintTop_toBottomOf="@+id/linearLayout3"
+        android:textStyle="bold"
+        android:background="@drawable/round_button"
+        android:elevation="@dimen/button_elevation"
+        android:alpha="0.7"
+        android:fadingEdge="horizontal"
+        android:fontFamily="serif"/>
 
     <LinearLayout
         android:id="@+id/linearLayout5"
@@ -111,7 +123,9 @@
             android:layout_weight="1"
             android:ems="10"
             android:hint="Usernmae"
-            android:inputType="textPersonName" />
+            android:inputType="textPersonName"
+            android:typeface="serif"
+            android:textStyle="bold"/>
     </LinearLayout>
 
 </android.support.constraint.ConstraintLayout>
