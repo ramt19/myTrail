@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <style>
+            #map {
+                height: 100%;
+            }
+            html, body {
+                height: 100%;
+                margin: 0;
+                padding: 0;
+            }
+        </style>
+    </head>
+    <body>
+        <div id="map"></div>
+        <script src="https://www.gstatic.com/firebasejs/5.8.5/firebase.js"></script>
+        <script>
+        // Initialize Firebase
+        var config = {
+            apiKey: "AIzaSyCFK5m47E5sg9vS7b0l0RDRa2FF55ibo1g",
+            authDomain: "mytrail-1ff79.firebaseapp.com",
+            databaseURL: "https://mytrail-1ff79.firebaseio.com",
+            projectId: "mytrail-1ff79",
+            storageBucket: "mytrail-1ff79.appspot.com",
+            messagingSenderId: "1023171543113"
+        };
+        var fire = firebase.initializeApp(config);
+        firebase.auth().signInAnonymously()
+        .then(function() {
+    
+        }).catch(function(error) {
+            var errorCode = error.code;
+            var errorMessage = error.message;
+            console.log(errorCode);
+            console.log(errorMessage);
+        });
+        </script>
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+        <script>  
+            var map;
+            var markersArray = [];
+            const urlParams = new URLSearchParams(window.location.search);
+            const myParam = urlParams.get('uid');
+            function initMap() { // Google Map Initialization... 
+                var loc={lat: 26.9192304, lng: 75.8203243};
+                map = new google.maps.Map(document.getElementById('map'), {
+                    zoom: 10,
+                    center: loc
+                });
+            }
+            function setMapOnAll(map) {
+                for (var i = 0; i < markersArray.length; i++) {
+                markersArray[i].setMap(map);
+                }
+            }
+            function AddLocation(data) { 
+                var loc = { lat: data.val().latitude, lng: data.val().longitude };
+                var marker = new google.maps.Marker({
+                    position: loc,
+                    icon: {
+                        path: "M0-48c-9.8 0-17.7 7.8-17.7 17.4 0 15.5 17.7 30.6 17.7 30.6s17.7-15.4 17.7-30.6c0-9.6-7.9-17.4-17.7-17.4z",
+                        fillColor: '#822121',
+                        fillOpacity: 1,
+                        strokeColor: '',
+                        strokeWeight: 0,
+                        scale: 0.8
+                    },
+                    map: map,
+                });
+                markersArray.push(marker);
+                map.setZoom(14);
+                map.panTo(loc);
+            }
+            function clearOverlays() {
+                setMapOnAll(null);
+                markersArray = [];
+            };
+            var ref = firebase.database().ref('Location');
+            ref.on("value", function(snapshot) {
+                snapshot.forEach(function(childSnapshot) {
+                    if(childSnapshot.key == myParam){
+                        AddLocation(childSnapshot);
+                    }
+                });
+            });	
+            ref.on('child_changed', function (snapshot) {
+                clearOverlays();
+                ref.on("value", function(snapshot) {
+                    snapshot.forEach(function(childSnapshot) {
+                        if(childSnapshot == myParam){
+                            AddLocation(childSnapshot);
+                        }
+                    });
+                });	
+            });
+        </script>
+        <script async defer src="https://maps.googleapis.com/maps/api/js?key=AIzaSyADgaHfK8x6mRZXag4hbq1B9p8whIMDoq4&callback=initMap">
+        </script>
+    </body>
+</html>
+
+
+
+
+
